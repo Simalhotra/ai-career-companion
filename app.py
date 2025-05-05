@@ -221,7 +221,7 @@ def get_industry_specific_feedback(model, resume_text, job_description):
 def create_streamlit_app():
     st.title("AI Career Companion")
 
-    api_key = st.text_input("Enter your Gemini API key:", type="password")
+    api_key = st.secrets["gemini"]["api_key"]
 
     uploaded_resume = st.file_uploader("Upload your resume (PDF, DOCX, or TXT)", type=["pdf", "docx", "txt"])
     uploaded_job = st.file_uploader("Upload job description (PDF, DOCX, or TXT)", type=["pdf", "docx", "txt"])

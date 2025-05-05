@@ -1,0 +1,5 @@
+streamlit
+pypdf
+docx
+requests
+google-generativeai

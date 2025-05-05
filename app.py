@@ -4,7 +4,6 @@ import google.generativeai as genai
 from pypdf import PdfReader
 import docx
 import requests
-import exceptions
 
 def setup_gemini_api(api_key):
     """Initialize the Gemini API with the provided key."""

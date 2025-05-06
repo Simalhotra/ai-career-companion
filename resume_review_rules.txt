@@ -1,0 +1,46 @@
+Resume Review Checklist for Resume Clinic
+GENERAL 
+* Ensure correct spelling and grammar
+* Avoid the use of first and third person pronouns, such as "I," "he," or "she."
+* Keep verb tenses consistent throughout. 
+* Use present tense for current activities and employment
+* Use past tense for activities and employment not presently held
+* Use action verbs and concise statements to articulate relevant experiences
+* Avoid using each verb or adjective more than once
+* Remove images, columns, tables, fields, text boxes, and graphics so application tracking systems can quickly scan your text for keywords and phrase
+* Spell out all acronyms the first time they are used, followed by the acronym in parentheses
+* Be consistent with alignment and appropriately use left, center, and right alignment
+* Make use of bold, underline, and italics to emphasize different aspects of your resume, such as headings and titles
+* The resume makes mention of transferable skills: Career & Self Development, Communication, Critical Thinking, Equity & Inclusion, Leadership, Professionalism, Teamwork, Technology
+* The document should look balanced and pleasing to the eyes, and easy to read
+* The resume should be organized in reverse chronological order, meaning the most recent experiences should be listed first, following your previous experiences 
+* Use a variety of action verbs to bring skills and experiences to life, refer handout
+* Do not use "responsible for" to describe experiences 
+* Emphasize results/outcome/quantifiable numbers
+* Resume must be on one page and 2 pages for Graduate students, if need be
+* Check for indentation and consistency in font size
+HEADER
+* Applicant's name should be the largest text on the page and is line 1 of the resume
+* Try and have a LinkedIn Link or Github URL on line 2 of resume
+* City, State is sufficient. Include LinkedIn URL and keep contact details on one line
+OBJECTIVE/SUMMARY
+* Objectives/summaries are optional. If need be include it, typically two sentences long
+* The most effective objective is one that is tailored to the job you are applying for
+EDUCATION
+* Standard formatting recommends?that education should be at the top, followed by experience, but this can vary
+* Ensure institution names are in full
+* Include graduation date or expected graduation date
+* Optional: Honors, GPA, Major GPA, Relevant Coursework
+WORK EXPERIENCE
+* Keep the most relevant job experience at the top or the most recent one
+* Always include employer, job title, location, and duration of employment
+* Avoid making the mistake of simply listing tasks
+* Focus on demonstrating that you helped the company solve its problems and achieve its goals 
+* Include internships, academic/personal projects, volunteer experience in your experience section to list a few
+
+SKILLS
+* Match your skills closely to?the job requirements while including skills that will compliment those that are being sought
+* Try and explain proficiency level and fluency with language skills
+* Differentiate between technical and language skills
+* Do not just list soft skills here. Instead use skills in describing work experiences 
+

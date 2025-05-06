@@ -159,17 +159,32 @@ def grammar_check_resume(resume_text):
         grammar_issues = []
         for match in result.get('matches', []):
             message = match.get('message', '')
+            rule_id = match.get('rule', {}).get('id', '')
             replacements = match.get('replacements', [])
             context = match.get('context', {})
             sentence = context.get('text', '')
             offset = context.get('offset', 0)
             length = context.get('length', 0)
+            error_word = sentence[offset:offset+length]
 
-            # Ignore suggestions with no replacements and unhelpful messages
-            if not replacements or "whitespace" in message.lower():
+            # Skip whitespace issues
+            if "whitespace" in message.lower():
                 continue
 
-            suggestions = ', '.join(rep['value'] for rep in replacements)
+            # Skip proper nouns flagged by spell checker
+            if rule_id == "MORFOLOGIK_RULE_EN_US" and error_word.istitle() and offset > 0:
+                continue
+
+            # Format replacement suggestions
+            if replacements:
+                suggestions = ', '.join(rep.get('value', '') for rep in replacements if rep.get('value', '').strip())
+            else:
+                suggestions = match.get('shortMessage', '').strip()
+
+            if not suggestions:
+                suggestions = "(No clear suggestion provided)"
+
+            # Highlight error word in sentence
             highlighted = sentence[:offset] + "**" + sentence[offset:offset+length] + "**" + sentence[offset+length:]
 
             issue = f"""🔹 **Issue:** {message}
@@ -179,12 +194,13 @@ def grammar_check_resume(resume_text):
             grammar_issues.append(issue)
 
         if not grammar_issues:
-            return "No major grammar issues found!"
+            return "✅ No major grammar issues found!"
         else:
             return "### Grammar Issues Found:\n\n" + "\n".join(grammar_issues)
 
     except Exception as e:
-        return f"Error checking grammar: {e}"
+        return f"❌ Error checking grammar: {e}"
+
 
 def get_industry_specific_feedback(model, resume_text, job_description):
     # First determine the industry
@@ -275,8 +291,8 @@ def create_streamlit_app():
                     result = generate_resume_versions(model, resume_text, job_description)
                 elif analysis_type == "Industry-Specific Feedback":
                     result = get_industry_specific_feedback(model, resume_text, job_description)
-                # elif analysis_type == "Grammar Check on Resume":
-                #     result = grammar_check_resume(resume_text)
+                elif analysis_type == "Grammar Check on Resume":
+                    result = grammar_check_resume(resume_text)
 
 
                 # Store result in session state

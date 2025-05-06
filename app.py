@@ -348,7 +348,10 @@ def create_streamlit_app():
 
                 # Add assistant response to chat history
                 st.session_state.messages.append({"role": "assistant", "content": feedback})
-
+    
+    else:
+        st.warning("Please upload both the resume and job description to proceed.")
+        st.stop()
 
 
 if __name__ == "__main__":

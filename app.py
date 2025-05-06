@@ -46,8 +46,14 @@ def extract_text_from_file(file_path):
 
 def analyze_resume_job_match(model, resume_text, job_description):
     """Use Gemini 2.0 Flash to analyze how well the resume matches the job description."""
+
+    with open("resume_review_rules.txt", "r") as f:
+      rules_text = f.read()
+
     prompt = f"""
     You are an expert in resume analysis and career coaching.
+    Use the following resume review rules to guide your feedback:
+    {rules_text}
 
     Please analyze the resume against the job description provided and give detailed feedback on:
 

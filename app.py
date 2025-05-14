@@ -411,6 +411,8 @@ def create_streamlit_app():
             with st.spinner("Analyzing..."):
                 if analysis_type == "Basic Resume Analysis":
                     result = analyze_resume_job_match(model, resume_text, job_description)
+                    # Show metrics dashboard
+                    display_metrics(resume_text, job_description,model)
                 elif analysis_type == "Skill Gap Analysis":
                     result = analyze_skill_gaps_with_resources(model, resume_text, job_description)
                 elif analysis_type == "Cover Letter Generation":

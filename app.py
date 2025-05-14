@@ -72,25 +72,31 @@ def analyze_resume_job_match(model, resume_text, job_description):
       rules_text = f.read()
 
     prompt = f"""
-    You are an expert in resume analysis and career coaching.
-    Use the following resume review rules to guide your feedback:
-    {rules_text}
+      You are an expert in resume analysis and career coaching.
 
-    Please analyze the resume against the job description provided and give detailed feedback on:
+      Use the following resume review rules to guide your evaluation:
+      {rules_text}
 
-    1. Match Score (0-100%): How well the candidate's qualifications match the job requirements
-    2. Strengths: Key strengths and qualifications that align well with the job
-    3. Gaps: Skills, experiences, or qualifications mentioned in the job description that are missing or not clearly demonstrated in the resume
-    4. Improvement Suggestions: Specific recommendations for improving the resume to better match this job description
-    5. Keywords: Important keywords from the job description that should be emphasized in the resume
+      Analyze the resume against the job description **in a job-specific and keyword-rich way**. Your response should be detailed and directly reflect the terminology and priorities of the job posting.
 
-    RESUME:
-    {resume_text}
+      Your analysis should include:
 
-    JOB DESCRIPTION:
-    {job_description}
+      1. **Match Score (0–100%)**: Quantify how well the candidate’s qualifications match the job description.
+      2. **Strengths**: Highlight resume elements that closely align with key job responsibilities and required skills, using terminology from the job posting.
+      3. **Gaps**: Identify missing skills or experiences that are explicitly mentioned in the job description.
+      4. **Improvement Suggestions**: Recommend edits that would increase alignment with the job description and help pass ATS filters.
+      5. **Keywords**: List 8–10 specific keywords or phrases from the job description that are (a) present or (b) missing from the resume.
+      6. **Rule-Based Feedback**: Refer back to the resume review rules provided above and evaluate how well the resume adheres to it. Highlight specific examples where the resume follows or violates these rules, and suggest concrete improvements grounded in them.
 
-    Provide your analysis in a structured format with clear headings and actionable feedback.
+      Make sure your language and phrasing reflects the structure and vocabulary of the job description.
+
+      RESUME:
+      {resume_text}
+
+      JOB DESCRIPTION:
+      {job_description}
+
+      Respond in a structured format with clear headings and bullet points where helpful.
     """
 
     response = model.generate_content(prompt)
@@ -154,13 +160,16 @@ def generate_interview_prep(model, resume_text, job_description):
     return response.text
 
 def generate_resume_versions(model, resume_text, job_description):
+    with open("resume_review_rules.txt", "r") as f:
+      rules_text = f.read()
+        
     prompt = f"""
     Create 3 different versions of bullet points for the candidate's most recent roles, each emphasizing different aspects:
     1. Version focusing on technical skills and achievements
     2. Version emphasizing leadership and collaboration
     3. Version highlighting business impact and results
 
-    For each version, rewrite the experience section to best position the candidate for this specific job.
+    For each version, rewrite the entire resume to best position the candidate for this specific job. Keep in mind the following resume rules: {rules_text}
 
     RESUME:
     {resume_text}

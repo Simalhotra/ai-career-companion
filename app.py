@@ -384,7 +384,7 @@ def display_metrics(resume_text, job_description,model):
 def create_streamlit_app():
     st.title("AI Career Companion")
 
-    api_key = st.secrets["gemini"]["GEMINI_API_KEY"]
+    api_key = st.secrets["gemini"]["API_KEY"]
 
     uploaded_resume = st.file_uploader("Upload your resume (PDF, DOCX, or TXT)", type=["pdf", "docx", "txt"])
     job_description=get_job_description()

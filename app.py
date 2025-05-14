@@ -5,6 +5,8 @@ from pypdf import PdfReader
 import docx
 import requests
 import re
+from collections import Counter
+import string
 
 def setup_gemini_api(api_key):
     """Initialize the Gemini API with the provided key."""

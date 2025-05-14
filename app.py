@@ -4,11 +4,30 @@ import google.generativeai as genai
 from pypdf import PdfReader
 import docx
 import requests
+import re
 
 def setup_gemini_api(api_key):
     """Initialize the Gemini API with the provided key."""
     genai.configure(api_key=api_key)
     return genai.GenerativeModel('gemini-2.0-flash')
+
+# ---------- Job Description Input ----------
+def get_job_description():
+    st.subheader("Job Description Input")
+    method = st.radio("Select input method:", ["Paste text", "Upload file"], horizontal=True)
+
+    if method == "Paste text":
+        job_description = st.text_area("Paste the job description here:", height=200)
+    else:
+        uploaded_file = st.file_uploader("Upload job description (PDF, DOCX, or TXT)", type=["pdf", "docx", "txt"])
+        job_description = ""
+        if uploaded_file:
+            with open(f"temp_job.{uploaded_file.name.split('.')[-1]}", "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            job_description = extract_text_from_file(f"temp_job.{uploaded_file.name.split('.')[-1]}")
+
+    return job_description.strip()
+
 
 def extract_text_from_pdf(pdf_path):
     """Extract text content from a PDF file."""
@@ -240,32 +259,137 @@ def get_industry_specific_feedback(model, resume_text, job_description):
     feedback_response = model.generate_content(feedback_prompt)
     return feedback_response.text
 
+# ---------- Utility Functions for Metrics ----------
+def resume_length_score(resume_text):
+    word_count = len(resume_text.split())
+    if word_count < 250:
+        return "Too short"
+    elif word_count > 900:
+        return "Too long"
+    return "Appropriate"
+
+
+def tone_score(resume_text, model):
+    prompt = f"""
+    Evaluate the professionalism and tone of the following resume text. Give a score out of 100,
+    considering clarity, formality, confidence, and conciseness. Only return a number like:
+    Tone Score: 85%
+
+    RESUME:
+    {resume_text}
+    """
+    try:
+        response = model.generate_content(prompt)
+        match = re.search(r"(\d{1,3})\s*%", response.text)
+        if match:
+            return int(match.group(1))
+    except:
+        return None
+    return None
+
+def compute_keyword_overlap_score(resume_text, job_description,model):
+    prompt = f"""
+    Compare the following resume and job description and estimate a keyword relevance score (0 to 100).
+    Focus on whether the resume captures the key responsibilities, terminologies, and themes mentioned in the job post,
+    even if exact keywords are not repeated.
+
+    Provide the result as: Keyword Match Score: XX%
+
+    RESUME:
+    {resume_text}
+
+    JOB DESCRIPTION:
+    {job_description}
+    """
+    try:
+        response = model.generate_content(prompt)
+        text = response.text.strip()
+        match = re.search(r"(\d{1,3})\s*%", text)
+        if match:
+            score = int(match.group(1))
+            return score
+    except Exception as e:
+        st.warning(f"⚠️ Keyword match scoring failed: {e}")
+    return 0
+
+def skill_coverage_score(resume_text, job_description,model):
+    prompt = f"""
+    Compare the following resume and job description and estimate a skill match score (0 to 100).
+    Focus on whether the candidate's resume demonstrates proficiency in the skills required by the job,
+    even if exact keywords are not matched.
+
+    Provide the result as: Skill Match Score: XX%
+
+    RESUME:
+    {resume_text}
+
+    JOB DESCRIPTION:
+    {job_description}
+    """
+    try:
+        response = model.generate_content(prompt)
+        text = response.text.strip()
+     
+        match = re.search(r"(\d{1,3})\s*%", text)
+        if match:
+            score = int(match.group(1))
+            return score
+    except Exception as e:
+        st.warning(f"Skill match scoring failed: {e}")
+    return 0
+
+
+def formatting_consistency_score(resume_text):
+    lines = resume_text.split('\n')
+    indent_counts = [len(line) - len(line.lstrip(' ')) for line in lines if line.strip()]
+    most_common_indent = Counter(indent_counts).most_common(1)[0][0] if indent_counts else 0
+    consistent_lines = sum(1 for count in indent_counts if count == most_common_indent)
+    consistency = consistent_lines / len(indent_counts) if indent_counts else 1
+    return round(consistency * 100, 2)
+
+# ---------- Streamlit Metrics Dashboard ----------
+def display_metrics(resume_text, job_description,model):
+
+    keyword_score = compute_keyword_overlap_score(resume_text, job_description,model)
+    skill_score = skill_coverage_score(resume_text, job_description,model)
+    formatting = formatting_consistency_score(resume_text)
+    length_status = resume_length_score(resume_text)
+    tone = tone_score(resume_text, model)
+
+    st.markdown("## 📊 Resume Metrics Dashboard")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Keyword Match %", f"{keyword_score}%")
+        st.metric("Skill Match %", f"{skill_score}%")
+        st.metric("Resume Length", length_status)
+
+    with col2:
+      st.metric("Formatting Consistency %", f"{formatting}%")
+      if tone is not None:
+          st.metric("Professional Tone Score", f"{tone}%")
+      else:
+          st.caption("Professional Tone Score: Could not be determined")
+          
 def create_streamlit_app():
     st.title("AI Career Companion")
 
     api_key = st.secrets["gemini"]["api_key"]
 
     uploaded_resume = st.file_uploader("Upload your resume (PDF, DOCX, or TXT)", type=["pdf", "docx", "txt"])
-    uploaded_job = st.file_uploader("Upload job description (PDF, DOCX, or TXT)", type=["pdf", "docx", "txt"])
+    job_description=get_job_description()
 
-    if api_key and uploaded_resume and uploaded_job:
+    if api_key and uploaded_resume and job_description:
         # Save uploaded files with extensions
         with open(f"temp_resume.{uploaded_resume.name.split('.')[-1]}", "wb") as f:
             f.write(uploaded_resume.getbuffer())
-        with open(f"temp_job.{uploaded_job.name.split('.')[-1]}", "wb") as f:
-            f.write(uploaded_job.getbuffer())
 
         # Update the file paths
         resume_file = f"temp_resume.{uploaded_resume.name.split('.')[-1]}"
-        job_file = f"temp_job.{uploaded_job.name.split('.')[-1]}"
-
         # Extract text
         resume_text = extract_text_from_file(resume_file)
-        job_description = extract_text_from_file(job_file)
 
         # Initialize model
         model = setup_gemini_api(api_key)
-
 
         # Store previous selection to detect change
         if "prev_analysis_type" not in st.session_state:
